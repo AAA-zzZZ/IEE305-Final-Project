@@ -19,6 +19,10 @@ async def lifespan(app: FastAPI):
             "Unit Revenue"	INTEGER,
             PRIMARY KEY("ID")
         );
+        """)
+        await con.commit()
+        
+        await con.execute("""
         CREATE TABLE IF NOT EXISTS "Team" (
             "ID"	INTEGER,
             "Name"	TEXT,
@@ -28,6 +32,10 @@ async def lifespan(app: FastAPI):
             UNIQUE("Name"),
             FOREIGN KEY("Vehicle Design ID") REFERENCES "Design"("ID")
         );
+        """)
+        await con.commit()
+        
+        await con.execute("""
         CREATE TABLE IF NOT EXISTS "Vehicle" (
             "Chassis Serial Number"	TEXT,
             "Team ID"	INTEGER,
