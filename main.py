@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from pydantic import BaseModel, Field
 import aiosqlite
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 
@@ -62,7 +62,6 @@ async def connect():
 class NewChassisPurchase(BaseModel):
     teamName: str
     chassisSerialNum: str
-    timeStamp: datetime  = Field(default_factory=datetime.utcnow)
 
 
 @app.post("/purchases/")
@@ -72,7 +71,7 @@ async def new_purchase(
     
 ):
     cur = await con.execute(
-        "SELECT ID FROM Team WHERE Name = ?", 
+        'SELECT "ID" FROM "Team" WHERE "Name" = ?', 
         (purchase.teamName,)
     )
     row = await cur.fetchone()
@@ -80,7 +79,17 @@ async def new_purchase(
         raise HTTPException(404, "Team not found")
     team_id = row[0]
     
-    purchase_time_str = purchase.timeStamp.strftime("%H:%M:%S")
+    cur = await con.execute(
+        'SELECT "Chassis Serial Number" FROM "Vehicle" WHERE "Chassis Serial Number" = ?', 
+        (purchase.chassisSerialNum,)
+    )
+    row = await cur.fetchone()
+    if row is not None:
+        raise HTTPException(404, "Chassis Already Purchased")
+    
+    now = datetime.now(timezone.utc)
+    purchase_time_str = now.strftime("%H:%M:%S")
+
     await con.execute(
         """
         INSERT INTO Vehicle
@@ -102,7 +111,6 @@ async def new_purchase(
 
 class NewVehicleSale(BaseModel):
     chassisSerialNum: str
-    timeStamp: datetime  = Field(default_factory=datetime.utcnow)
 
 @app.post("/sales/")
 async def new_sale(
@@ -120,7 +128,8 @@ async def new_sale(
     if row[0] is not None:
         raise HTTPException(status_code=400, detail="Vehicle already sold")
 
-    sold_time_str = sale.timeStamp.strftime("%H:%M:%S")
+    now = datetime.now(timezone.utc)
+    sold_time_str = now.strftime("%H:%M:%S")
 
     await con.execute(
         '''
