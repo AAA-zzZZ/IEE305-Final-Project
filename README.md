@@ -1,6 +1,6 @@
 # Product Lifecycle Management System (PLM) – Relational Database Implementation
 
-##Overview
+## Overview
 This repository contains the implementation of a **Product Lifecycle Management (PLM) system** designed as part of a consulting-style project for the *Product Design Game* (Grogan and de Weck, 2019). 
 
 The goal of the project was to transition from a spreadsheet-based PLM (Google Sheets) to a **relational database system**. The new system simplifies data management, provides cleaner SQL-based queries, and integrates with HTTP API endpoints to track manufacturing events in real-time.
